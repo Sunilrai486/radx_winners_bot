@@ -1,0 +1,102 @@
+.IDE-panel {
+    flex: 1;
+    max-height: 100vh;
+    width: 100%;
+    overflow-y: hidden;
+}
+
+.IDE-main {
+    display: flex;
+    height: calc(100vh - 50px);
+}
+
+
+.left-container {
+    position: relative;
+    flex: 60%;
+    height: calc(100vh - 50px);
+}
+
+.right-container {
+    flex: 40%;
+    height: calc(100vh-50px);
+    display: flex;
+    flex-direction: column;
+    border-left: 3px solid #1f65e6;
+    padding: 5px;
+}
+
+.input-box {
+    color: #333;
+    flex: 50%;
+}
+.input-box textarea {
+    color: black;
+}
+
+.spinner-box {
+    flex: 50%;
+    background-color: #f1f1f1;
+    overflow-y: auto;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+
+.spinner-box img {
+    width: 200px;
+}
+ 
+.output-box {
+    flex: 50%;
+    background-color: #f1f1f1;
+    overflow-y: auto;
+    position: relative;
+}
+
+.IDE-panel button {
+    color: white;
+    background-color: #1f65e6;
+    font-weight: bold;
+    cursor: pointer;
+    font-size: 22px;
+    font-weight: bold;
+    border: none;
+    border-radius: 4px;
+    transition: 0.3s;
+}
+
+.clear-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 18px;
+    width: 80px;
+    height: 40px;
+}
+ 
+.output-box pre {
+    white-space: pre-wrap;
+}
+ 
+#code-inp {
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    resize: none;
+    background-color: #f1f1f1;
+    padding: 5px;
+    border-radius: 5px;
+}
+ 
+#code-inp:focus {
+    outline: none;
+}
+ 
+.run-btn {
+    position: absolute;
+    bottom: 10px;
+    right: 18px;
+    width: 80px;
+    height: 40px;
+}
