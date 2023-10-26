@@ -10,22 +10,22 @@ app.use(express.json());
 app.post('/compile', (req, res) => {
     // Receive the required data from the request
     let code = req.body.code;
-    let langauge = req.body.language;
+    let language = req.body.language;
     let input = req.body.input;
 
-    if (langauge == 'python') {
+    if (language == 'python') {
         language = 'py'
     }
 
     let data = ({
         "code": code,
-        "langauge": language,
+        "language": language,
         "input": input
     });
 
     let config = {
         method: "post",
-        url: 'https://codexweb.netlify.app/.netlify/functions/enforceCode',
+        url: 'https://api.codex.jaagrav.in',
         headers: {
             'Content-Type': 'application/json'
         },
@@ -39,6 +39,7 @@ app.post('/compile', (req, res) => {
             console.log(response.data)
         }).catch((error) => {
             console.log(error);
+            res.send(error)
         });
 })
 
