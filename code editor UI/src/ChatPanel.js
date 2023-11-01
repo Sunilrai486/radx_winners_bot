@@ -1,11 +1,46 @@
 import React, { useState, useEffect } from 'react';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
+import SwitchButton from './SwitchButton';
 
 function ChatPanel() {
-    const [messages, setMessages] = useState([]);
+    const [isSwitchOn, setIsSwitchOn] = useState(false);
+    const [headingText, setHeadingText] = useState('Task Master')
+
+    var [messages, setMessages] = useState([]);
+
+    const [taskmaster_messages, setTMMessages] = useState([]);
+    const [juniorbot_messages, setBMessages] = useState([]);
+
     const [currentBotResponseChunks, setCurrentBotResponseChunks] = useState([]);
     const [isBotTyping, setIsBotTyping] = useState(false);
+
+    const handleToggleSwitch = (newState) => {
+        if(newState){
+            setBMessages([...juniorbot_messages, { type: 'user', content: "Hi Junior!" }]);
+            setBMessages(prev => [...prev, { type: 'bot', content: "Hello Bro!" }]);
+            setIsSwitchOn(true);
+        }else{
+            setTMMessages([...taskmaster_messages, { type: 'user', content: "Hi Master!" }]);
+            setTMMessages(prev => [...prev, { type: 'bot', content: "Hello Student!" }]);       
+            setIsSwitchOn(false);
+        }
+
+        // console.log(messages)
+        setHeadingText(newState ? 'Junior Bot': 'Task Master' )
+    };
+      // Use useEffect to update messages when the toggle is already on
+    useEffect(() => {
+        if (isSwitchOn) {
+            setMessages(juniorbot_messages, () => {
+                console.log(messages);
+            }); 
+        } else {
+            setMessages(taskmaster_messages, () => {
+                console.log(messages);
+            }); 
+        }
+    }, [isSwitchOn, juniorbot_messages, taskmaster_messages]);
 
     const messagesContainerRef = React.useRef(null);
     useEffect(() => {
@@ -13,7 +48,20 @@ function ChatPanel() {
     }, [currentBotResponseChunks]);
 
     const handleUserSubmit = async (query) => {
-        setMessages([...messages, { type: 'user', content: query }]);
+        // setMessages([...messages, { type: 'user', content: query }]);
+
+        if(messages = [] && isSwitchOn){
+            setBMessages([...juniorbot_messages, { type: 'user', content: query }]);
+        }
+        else if(messages = [] && isSwitchOn == false){
+            setTMMessages([...taskmaster_messages, { type: 'user', content: query }]);
+        }
+        else if(isSwitchOn){
+            setBMessages(prev => [...prev, { type: 'user', content: query }]);
+        }
+        else if(isSwitchOn == false){
+            setTMMessages(prev => [...prev, { type: 'user', content: query }]);
+        }
         setIsBotTyping(true);
         
         try {
@@ -44,7 +92,12 @@ function ChatPanel() {
 
             // After all chunks are revealed, add the entire response to the messages and clear the currentBotResponseChunks
             setTimeout(() => {
-                setMessages(prev => [...prev, { type: 'bot', content: data.response }]);
+                if(isSwitchOn){
+                    setBMessages(prev => [...prev, { type: 'bot', content: data.response }]);
+                }else{
+                    setTMMessages(prev => [...prev, { type: 'bot', content: data.response }]);
+                }
+                // setMessages(prev => [...prev, { type: 'bot', content: data.response }]);
                 setCurrentBotResponseChunks([]);
                 setIsBotTyping(false);
             }, 1000 * chunks.length);
@@ -56,7 +109,8 @@ function ChatPanel() {
 
     return (
         <div className="chat-panel">
-        <h4>ReX</h4>
+            <SwitchButton onToggle={handleToggleSwitch}/>
+            <h4>{headingText}</h4>
             <MessageList messages={messages} currentBotResponseChunks={currentBotResponseChunks} ref={messagesContainerRef} />
             <InputArea onSubmit={handleUserSubmit} isBotTyping={isBotTyping} />
         </div>

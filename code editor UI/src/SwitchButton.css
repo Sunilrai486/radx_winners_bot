@@ -1,0 +1,27 @@
+.switch {
+    margin-top: 10px;
+    width: 40px;
+    height: 20px;
+    background-color: #ccc;
+    border-radius: 15px;
+    position: relative;
+    cursor: pointer;
+  }
+  
+  .switch.on {
+    background-color: #4CAF50;
+  }
+  
+  .slider {
+    width: 20px;
+    height: 20px;
+    background-color: white;
+    border-radius: 50%;
+    position: absolute;
+    transition: 0.2s;
+  }
+  
+  .switch.on .slider {
+    transform: translateX(20px);
+  }
+  
