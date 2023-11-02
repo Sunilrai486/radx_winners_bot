@@ -1,10 +1,13 @@
 from flask import Flask
+from flask_cors import CORS
 
 from app.routes.juniorbot import juniorbot_module
 from app.routes.taskmaster import taskmaster_module
 
 # Initialize Flask API
 app = Flask(__name__)
+
+CORS(app)
 
 # Initialize Base Flask API
 @app.route('/')

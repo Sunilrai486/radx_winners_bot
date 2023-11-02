@@ -17,27 +17,26 @@ function ChatPanel() {
 
     const handleToggleSwitch = (newState) => {
         if(newState){
-            setBMessages([...juniorbot_messages, { type: 'user', content: "Hi Junior!" }]);
-            setBMessages(prev => [...prev, { type: 'bot', content: "Hello Bro!" }]);
+            // setBMessages([...juniorbot_messages, { type: 'user', content: "Hi Junior!" }]);
+            // setBMessages(prev => [...prev, { type: 'bot', content: "Hello Bro!" }]);
             setIsSwitchOn(true);
         }else{
-            setTMMessages([...taskmaster_messages, { type: 'user', content: "Hi Master!" }]);
-            setTMMessages(prev => [...prev, { type: 'bot', content: "Hello Student!" }]);       
+            // setTMMessages([...taskmaster_messages, { type: 'user', content: "Hi Master!" }]);
+            // setTMMessages(prev => [...prev, { type: 'bot', content: "Hello Student!" }]);       
             setIsSwitchOn(false);
         }
 
-        // console.log(messages)
         setHeadingText(newState ? 'Junior Bot': 'Task Master' )
     };
       // Use useEffect to update messages when the toggle is already on
     useEffect(() => {
         if (isSwitchOn) {
             setMessages(juniorbot_messages, () => {
-                console.log(messages);
+                console.log(juniorbot_messages);
             }); 
         } else {
             setMessages(taskmaster_messages, () => {
-                console.log(messages);
+                console.log(taskmaster_messages);
             }); 
         }
     }, [isSwitchOn, juniorbot_messages, taskmaster_messages]);
@@ -48,33 +47,59 @@ function ChatPanel() {
     }, [currentBotResponseChunks]);
 
     const handleUserSubmit = async (query) => {
-        // setMessages([...messages, { type: 'user', content: query }]);
 
-        if(messages = [] && isSwitchOn){
+        if(messages == [] && isSwitchOn){
             setBMessages([...juniorbot_messages, { type: 'user', content: query }]);
         }
-        else if(messages = [] && isSwitchOn == false){
+        else if(messages == [] && isSwitchOn === false){
             setTMMessages([...taskmaster_messages, { type: 'user', content: query }]);
         }
         else if(isSwitchOn){
             setBMessages(prev => [...prev, { type: 'user', content: query }]);
         }
-        else if(isSwitchOn == false){
+        else if(isSwitchOn === false){
             setTMMessages(prev => [...prev, { type: 'user', content: query }]);
         }
         setIsBotTyping(true);
         
         try {
-            const result = await fetch('/api/query-vertex', {
-                method: 'POST',
-                headers: {
+            var baseURL = "http://127.0.0.1:5000";
+            var apiURL = "";
+            var method = "GET";
+            
+            if(isSwitchOn){
+                apiURL = baseURL + "/juniorbot/"
+            }else{
+                apiURL = baseURL + "/taskmaster/"
+            }
+
+            if(query !== ""){
+                apiURL = apiURL + "query"
+                if(taskmaster_messages !== "" || juniorbot_messages === ""){
+                    apiURL = apiURL + "task"
+                }
+                method = "POST"
+            }
+
+            const requestOptions = {
+                method: method,
+            };
+            
+            if (method === 'POST') {
+                requestOptions.headers = {
                     'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ query }),
-            });
+                };
+                
+                if (query) {
+                    requestOptions.body = JSON.stringify({ query });
+                }
+            }
+
+            const result = await fetch(apiURL, requestOptions);              
 
             const data = await result.json();
-            const words = data.response.trim().split(' ');
+            const responsedata = data.body.response.trim();
+            const words = responsedata.split(' ');
             let chunks = [];
 
             while (words.length) {
@@ -93,11 +118,10 @@ function ChatPanel() {
             // After all chunks are revealed, add the entire response to the messages and clear the currentBotResponseChunks
             setTimeout(() => {
                 if(isSwitchOn){
-                    setBMessages(prev => [...prev, { type: 'bot', content: data.response }]);
+                    setBMessages(prev => [...prev, { type: 'bot', content: responsedata }]);
                 }else{
-                    setTMMessages(prev => [...prev, { type: 'bot', content: data.response }]);
+                    setTMMessages(prev => [...prev, { type: 'bot', content: responsedata }]);
                 }
-                // setMessages(prev => [...prev, { type: 'bot', content: data.response }]);
                 setCurrentBotResponseChunks([]);
                 setIsBotTyping(false);
             }, 1000 * chunks.length);
