@@ -1,6 +1,6 @@
 const express = require('express');
 const cors = require('cors');
-const Axios = require('axios');
+const axios = require('axios');
 const app = express();
 const PORT = 9000;
 
@@ -9,38 +9,77 @@ app.use(express.json());
 
 app.post('/compile', (req, res) => {
     // Receive the required data from the request
-    let code = req.body.code;
-    let language = req.body.language;
-    let input = req.body.input;
+    let code = req.body.code != "" ? btoa(unescape(encodeURIComponent(req.body.code || ""))) : "";
+    let language = req.body.language
+    let input =  req.body.input != "" ? btoa(unescape(encodeURIComponent(req.body.input || ""))) : "";
+    console.log(code);
+    console.log(input)
+    let languageid = 0
 
-    if (language == 'python') {
-        language = 'py'
+    if(language == 'c'){
+        languageid = 50
+    } else if(language == 'cpp'){
+        languageid = 54
+    }else if(language == 'python'){
+        languageid = 71
+    }else if(language == 'java'){
+        languageid = 91
     }
 
-    let data = ({
-        "code": code,
-        "language": language,
-        "input": input
-    });
-
-    let config = {
-        method: "post",
-        url: 'https://api.codex.jaagrav.in',
-        headers: {
-            'Content-Type': 'application/json'
+    
+    const options = {
+        method: 'POST',
+        url: 'https://judge0-ce.p.rapidapi.com/submissions',
+        params: {
+            base64_encoded: 'true',
+            fields: '*'
         },
-        data: data
+        headers: {
+            'content-type': 'application/json',
+            'Content-Type': 'application/json',
+            'X-RapidAPI-Key': '7d33c45fabmsh2dbe628ab9eb233p12cae9jsnbe190c58d967',
+            'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+        },
+        data: {
+            language_id: languageid,
+            source_code: code,
+            stdin: input
+        }
     };
 
+    var responseToken = "";
+
     // Call the code compilation API
-    Axios(config)
+    axios(options)
         .then((response) => {
-            res.send(response.data)
-            console.log(response.data)
+            console.log(response.data.token)
+            responseToken = response.data.token;
+
+            const newoptions = {
+                method: 'GET',
+                url: 'https://judge0-ce.p.rapidapi.com/submissions/' + responseToken,
+                headers: {
+                    'X-RapidAPI-Key': '7d33c45fabmsh2dbe628ab9eb233p12cae9jsnbe190c58d967',
+                    'X-RapidAPI-Host': 'judge0-ce.p.rapidapi.com'
+                }
+            };
+            setTimeout(() => {
+                axios(newoptions)
+                .then((response) => {
+                    console.log(response.data);
+                    res.send(response.data);
+                }).catch((error) => {
+                    console.log(error);
+                    res.send(error);
+                });
+            }, 5000);
+
+
         }).catch((error) => {
             console.log(error);
             res.send(error)
         });
+    
 })
 
 app.listen(process.env.PORT || PORT, () => {

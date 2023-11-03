@@ -2,10 +2,13 @@ import React, { useState, useEffect } from 'react';
 import MessageList from './MessageList';
 import InputArea from './InputArea';
 import SwitchButton from './SwitchButton';
+// import { Light as SyntaxHighlighter } from 'react-syntax-highlighter';
+// import { prism } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
 function ChatPanel() {
     const [isSwitchOn, setIsSwitchOn] = useState(false);
     const [headingText, setHeadingText] = useState('Task Master')
+    const [responseData, setResponseData] = useState('')
 
     var [messages, setMessages] = useState([]);
 
@@ -34,10 +37,12 @@ function ChatPanel() {
             setMessages(juniorbot_messages, () => {
                 console.log(juniorbot_messages);
             }); 
+            setHeadingText('Junior Bot')
         } else {
             setMessages(taskmaster_messages, () => {
                 console.log(taskmaster_messages);
             }); 
+            setHeadingText('Task Master')
         }
     }, [isSwitchOn, juniorbot_messages, taskmaster_messages]);
 
@@ -48,13 +53,13 @@ function ChatPanel() {
 
     const handleUserSubmit = async (query) => {
 
-        if(messages == [] && isSwitchOn){
+        if(juniorbot_messages.length == 0 && isSwitchOn){
             setBMessages([...juniorbot_messages, { type: 'user', content: query }]);
         }
-        else if(messages == [] && isSwitchOn === false){
+        else if(taskmaster_messages.length == 0 && isSwitchOn === false){
             setTMMessages([...taskmaster_messages, { type: 'user', content: query }]);
         }
-        else if(isSwitchOn){
+        else if(isSwitchOn && juniorbot_messages.length > 1){
             setBMessages(prev => [...prev, { type: 'user', content: query }]);
         }
         else if(isSwitchOn === false){
@@ -75,7 +80,7 @@ function ChatPanel() {
 
             if(query !== ""){
                 apiURL = apiURL + "query"
-                if(taskmaster_messages !== "" || juniorbot_messages === ""){
+                if(taskmaster_messages !== "" && juniorbot_messages === ""){
                     apiURL = apiURL + "task"
                 }
                 method = "POST"
@@ -98,7 +103,55 @@ function ChatPanel() {
             const result = await fetch(apiURL, requestOptions);              
 
             const data = await result.json();
-            const responsedata = data.body.response.trim();
+            var responsedata = data.body.response;
+            // alert(responsedata)
+
+
+
+            
+            // // Define a regular expression to match triple-backtick code blocks
+            // const regex = /```([\s\S]*?)```/;
+
+            // // Use the regex to find the first code block
+            // const match = regex.exec(responsedata);
+            // var languageName = "";
+            // var restOfTheCode = "";
+            // if (match) {
+            //     // The first code block content is in match[1]
+            //     const firstCodeBlockContent = match[1];
+                
+            //     console.log("First Code Block Content:");
+            //     console.log(firstCodeBlockContent);
+            
+            //     // Use regular expressions to extract the language name and code
+            //     const languageRegex = /^(\w+)\s+/; // Matches the language name at the beginning of the code
+            //     const languageMatch = firstCodeBlockContent.match(languageRegex);
+
+            //     if (languageMatch) {
+            //         languageName = languageMatch[1];
+            //         restOfTheCode = firstCodeBlockContent.replace(languageRegex, '');
+                
+            //         console.log('Language Name:', languageName);
+            //         console.log('Rest of the Code:', restOfTheCode);
+            //     } else {
+            //         console.log('Language not found in the code.');
+            //     }
+
+            //     // Render the code block with syntax highlighting
+            //     const highlightedCode = (
+            //         <SyntaxHighlighter language={languageName} style={prism}>
+            //             {restOfTheCode}
+            //         </SyntaxHighlighter>
+            //     );
+                
+            //     // Replace the code block in the response data with the highlighted code
+            //     responsedata = responsedata.replace(firstCodeBlockContent, highlightedCode);
+            //     console.log(responsedata)
+
+            // } else {
+            //     console.log("No code block found in the input string.");
+            // }
+
             const words = responsedata.split(' ');
             let chunks = [];
 
@@ -117,13 +170,19 @@ function ChatPanel() {
 
             // After all chunks are revealed, add the entire response to the messages and clear the currentBotResponseChunks
             setTimeout(() => {
+                setCurrentBotResponseChunks([]);
+                setIsBotTyping(false);
+
                 if(isSwitchOn){
                     setBMessages(prev => [...prev, { type: 'bot', content: responsedata }]);
                 }else{
                     setTMMessages(prev => [...prev, { type: 'bot', content: responsedata }]);
+                    if(juniorbot_messages.length == 0){
+                        setIsSwitchOn(true);
+                        setBMessages([...juniorbot_messages, { type: 'user', content: responsedata }]);
+                        setResponseData(responsedata)
+                    }
                 }
-                setCurrentBotResponseChunks([]);
-                setIsBotTyping(false);
             }, 1000 * chunks.length);
 
         } catch (error) {
@@ -131,9 +190,16 @@ function ChatPanel() {
         }
     };
 
+    // Use a useEffect to call handleUserSubmit when isSwitchOn is true and juniorbot_messages is updated
+    useEffect(() => {
+        if (isSwitchOn && juniorbot_messages.length === 1) {
+            handleUserSubmit(responseData);
+        }
+    }, [isSwitchOn, juniorbot_messages, responseData]);
+
     return (
         <div className="chat-panel">
-            <SwitchButton onToggle={handleToggleSwitch}/>
+            <SwitchButton onToggle={handleToggleSwitch} isOn={isSwitchOn}/>
             <h4>{headingText}</h4>
             <MessageList messages={messages} currentBotResponseChunks={currentBotResponseChunks} ref={messagesContainerRef} />
             <InputArea onSubmit={handleUserSubmit} isBotTyping={isBotTyping} />

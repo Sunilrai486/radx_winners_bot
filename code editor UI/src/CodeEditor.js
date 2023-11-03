@@ -43,7 +43,7 @@ function CodeEditor() {
             language: userLang,
             input: userInput
         }).then((res) => {
-            setUserOutput(res.data.output);
+            setUserOutput(res.data.stdout);
         }).then(() => {
             setLoading(false);
         })

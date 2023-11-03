@@ -7,7 +7,11 @@ openai.api_key = OPENAI_APIKEY
 
 taskmaster_message = []
 juniorbot_message = []
-  
+  #langchain taskmater => junior bot.
+  #judge0 compiler
+  #checking with gpt-4 and comapring gpt-3.5 and 4 results for the api.
+  #---------junior bot should have knowledge about the code in the compiler.--------------------Out of scope for now-------------------
+  #formatted code response block with copy like that of chatgpt.
 def callopenai(role, task = None):
   global taskmaster_message
   global juniorbot_message
@@ -25,11 +29,13 @@ def callopenai(role, task = None):
     ]
   elif(role == "juniorbot"  and juniorbot_message == []):
     system_message = """Simulate a pair programming session with a senior programmer. 
-    Your role is crucial where you will act as a junior programmer and a human will act as a senior programmer.Please provide the programming solution as an uncompilable code with bugs so that senior programmer's feedback is required to complete the solution. 
-    The priority for this programming solution is Python programming language. The code should be inside a code block. 
+    Your role is crucial where you will act as a junior programmer and a human will act as a senior programmer.
+    Please provide the programming solution as an uncompilable code with bugs so that senior programmer's feedback is required to complete the solution. 
+    The priority for this programming solution is Python programming language. 
+    You can include code blocks to make it clear.
     Always remember the previous conversations and follow the senior programmer input as instructions for pair programming to reach a final solution and never provide the working solution with a single input.
     Don't provide any steps and code explanations as a response."""
-      
+    
     juniorbot_message = [
       {"role": "system", "content": system_message},
     ]

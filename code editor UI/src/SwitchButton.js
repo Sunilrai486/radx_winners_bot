@@ -1,16 +1,20 @@
-import React, { useState } from 'react';
-import './SwitchButton.css'
+import React, { useState, useEffect } from 'react';
+import './SwitchButton.css';
 
-function SwitchButton({onToggle}) {
-  const [isOn, setIsOn] = useState(false);
+function SwitchButton({ onToggle, isOn }) {
+  const [internalIsOn, setInternalIsOn] = useState(isOn);
+
+  useEffect(() => {
+    setInternalIsOn(isOn);
+  }, [isOn]);
 
   const toggleSwitch = () => {
-    setIsOn(!isOn);
-    onToggle(!isOn)
+    setInternalIsOn(!internalIsOn);
+    onToggle(!internalIsOn);
   };
 
   return (
-    <div className={`switch ${isOn ? 'on' : 'off'}`} onClick={toggleSwitch}>
+    <div className={`switch ${internalIsOn ? 'on' : 'off'}`} onClick={toggleSwitch}>
       <div className="slider"></div>
     </div>
   );
