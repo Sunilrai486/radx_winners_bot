@@ -7,11 +7,7 @@ openai.api_key = OPENAI_APIKEY
 
 taskmaster_message = []
 juniorbot_message = []
-  #langchain taskmater => junior bot.
-  #judge0 compiler
-  #checking with gpt-4 and comapring gpt-3.5 and 4 results for the api.
-  #---------junior bot should have knowledge about the code in the compiler.--------------------Out of scope for now-------------------
-  #formatted code response block with copy like that of chatgpt.
+
 def callopenai(role, task = None):
   global taskmaster_message
   global juniorbot_message
@@ -21,7 +17,7 @@ def callopenai(role, task = None):
     Identify errors, explain concepts, and clarify doubts. Encourage positive efforts and adjust challenges appropriately.
     After completion, give constructive feedback. Foster a learning environment and empower participants to learn through active problem-solving."""
 
-    task_prompt = "Please start by greeting and then provide a programming challenge task for a programmer with an explanation. The programming langauges supported are Python."
+    task_prompt = "Please start by greeting and then provide a programming challenge task for a programmer with a brief explanation. The programming language supported is Python."
     
     taskmaster_message = [
       {"role": "system", "content": system_message},
@@ -29,12 +25,10 @@ def callopenai(role, task = None):
     ]
   elif(role == "juniorbot"  and juniorbot_message == []):
     system_message = """Simulate a pair programming session with a senior programmer. 
-    Your role is crucial where you will act as a junior programmer and a human will act as a senior programmer.
-    Please provide the programming solution as an uncompilable code with bugs so that senior programmer's feedback is required to complete the solution. 
-    The priority for this programming solution is Python programming language. 
-    You can include code blocks to make it clear.
-    Always remember the previous conversations and follow the senior programmer input as instructions for pair programming to reach a final solution and never provide the working solution with a single input.
-    Don't provide any steps and code explanations as a response."""
+    Your role is crucial; you will act as a junior programmer, and a human will act as a senior programmer.
+    Please provide the programming solution as an uncompilable code with bugs so that the senior programmer's feedback is required to complete the solution. 
+    Don't provide hints to the bugs present in the code.
+    You can include code blocks to make it clear."""
     
     juniorbot_message = [
       {"role": "system", "content": system_message},
@@ -57,7 +51,7 @@ def callopenai(role, task = None):
   
   if(role == "taskmaster"):
     response = openai.ChatCompletion.create(
-      model="gpt-3.5-turbo",
+      model="gpt-4",
       messages= taskmaster_message
     )
     
